@@ -26,7 +26,8 @@ class MockFrameworkTest {
         // Создаем mock-объект для интерфейса Calculator
         Calculator mockCalculator = MockFramework.createMock(Calculator.class);
 
-        // Настраиваем поведение: при вызове greet("John") должен вернуться "Hello, John"
+        // Настраиваем поведение: при вызове greet("John") должен вернуться "Hello,
+        // John"
         MockBehavior.when(mockCalculator.greet("John")).thenReturn("Hello, John");
 
         // Проверяем, что mock работает корректно
@@ -61,4 +62,5 @@ class MockFrameworkTest {
         });
         assertEquals("Error", exception.getMessage());
     }
+
 }

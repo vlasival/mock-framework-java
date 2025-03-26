@@ -7,23 +7,28 @@ import java.util.Objects;
 public class MethodSignature {
     private final Method method;
     private final Object[] args;
+    private final Class<?> declaringClass;
 
     public MethodSignature(Method method, Object[] args) {
         this.method = method;
-        this.args = args != null ? args : new Object[0];
+        this.args = args;
+        this.declaringClass = method.getDeclaringClass();
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         MethodSignature that = (MethodSignature) o;
-        return method.equals(that.method) && 
-               Arrays.deepEquals(args, that.args);
+        return method.equals(that.method) &&
+                Arrays.deepEquals(args, that.args) &&
+                declaringClass.equals(that.declaringClass);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(method, Arrays.deepHashCode(args));
+        return Objects.hash(method, Arrays.deepHashCode(args), declaringClass);
     }
 }

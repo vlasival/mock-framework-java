@@ -1,6 +1,7 @@
 package org.mock.core;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import org.mock.behavior.BehaviorRegistry;
 import org.mock.behavior.ReturnBehavior;
@@ -17,12 +18,28 @@ public class OngoingStubbing<T> {
     }
 
     public void thenReturn(T value) {
-        MethodSignature signature = new MethodSignature(method, args);
-        BehaviorRegistry.registerRule(signature, new ReturnBehavior<>(value));
+        if (Modifier.isStatic(method.getModifiers())) {
+            BehaviorRegistry.registerStaticRule(
+                    method.getDeclaringClass(),
+                    new MethodSignature(method, args),
+                    new ReturnBehavior<>(value));
+        } else {
+            BehaviorRegistry.registerInstanceRule(
+                    new MethodSignature(method, args),
+                    new ReturnBehavior<>(value));
+        }
     }
 
     public void thenThrow(Throwable exception) {
-        MethodSignature signature = new MethodSignature(method, args);
-        BehaviorRegistry.registerRule(signature, new ThrowBehavior(exception));
+        if (Modifier.isStatic(method.getModifiers())) {
+            BehaviorRegistry.registerStaticRule(
+                    method.getDeclaringClass(),
+                    new MethodSignature(method, args),
+                    new ThrowBehavior(exception));
+        } else {
+            BehaviorRegistry.registerInstanceRule(
+                    new MethodSignature(method, args),
+                    new ThrowBehavior(exception));
+        }
     }
 }
