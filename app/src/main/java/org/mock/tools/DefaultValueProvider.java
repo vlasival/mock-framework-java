@@ -1,5 +1,8 @@
 package org.mock.tools;
 
+/**
+ * Поставщик значений по умолчанию для ненастроенных методов.
+ */
 public class DefaultValueProvider {
     public static Object getDefaultValue(Class<?> type) {
         if (type.isPrimitive()) {

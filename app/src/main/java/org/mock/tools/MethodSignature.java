@@ -1,29 +1,41 @@
 package org.mock.tools;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
+import org.mock.matchers.ArgumentMatcher;
+
+/**
+ * Сигнатура метода, используется для сравнения вызовов методов.
+ */
 public class MethodSignature {
     private final Method method;
-    private final Object[] args;
+    private final List<ArgumentMatcher<?>> matchers;
+    private final boolean isStatic;
+    private final Class<?> clazz;
 
-    public MethodSignature(Method method, Object[] args) {
+    public MethodSignature(Method method, Object[] args, List<ArgumentMatcher<?>> matchers, boolean isStatic, Class<?> clazz) {
         this.method = method;
-        this.args = args != null ? args : new Object[0];
+        this.matchers = matchers;
+        this.isStatic = isStatic;
+        this.clazz = clazz;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        MethodSignature that = (MethodSignature) o;
-        return method.equals(that.method) && 
-               Arrays.deepEquals(args, that.args);
+    public boolean matches(Object[] args) {
+        if (method.getParameterCount() != args.length) return false;
+        for (int i = 0; i < args.length; i++) {
+            if (matchers != null && i < matchers.size()) {
+                if (!matchers.get(i).matches(args[i])) return false;
+            } else {
+                if (!Objects.equals(args[i], method.getParameters()[i])) return false;
+            }
+        }
+        return true;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(method, Arrays.deepHashCode(args));
-    }
+    // Геттеры
+    public Method getMethod() { return method; }
+    public boolean isStatic() { return isStatic; }
+    public Class<?> getClazz() { return clazz; }
 }

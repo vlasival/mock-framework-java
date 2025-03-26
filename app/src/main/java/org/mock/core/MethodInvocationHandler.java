@@ -8,7 +8,8 @@ import org.mock.tools.DefaultValueProvider;
 import org.mock.tools.MethodCall;
 
 /**
- * Отвечает за перехват вызовов методов mock-объектов.
+ * Обработчик вызовов методов для mock-объектов.
+ * Перехватывает вызовы, ищет правила поведения и возвращает результаты.
  */
 public class MethodInvocationHandler implements InvocationHandler {
     
@@ -16,10 +17,13 @@ public class MethodInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        MethodCall call = new MethodCall(method, args);
-        lastMethodCall.set(call);
+        BehaviorRule rule = BehaviorRegistry.findRule(
+            method, 
+            args,
+            false, 
+            null
+        );
         
-        BehaviorRule rule = BehaviorRegistry.findRule(method, args);
         if (rule != null) {
             return rule.execute();
         }

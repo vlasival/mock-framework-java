@@ -1,4 +1,5 @@
 package org.mock.behavior;
+
 public class ReturnBehavior<T> implements BehaviorRule {
     private final T value;
 

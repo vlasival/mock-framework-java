@@ -6,23 +6,22 @@ import org.mock.behavior.BehaviorRegistry;
 import org.mock.behavior.ReturnBehavior;
 import org.mock.behavior.ThrowBehavior;
 
-/**
- * Цепочка настройки поведения для обычных методов.
- */
-public class OngoingStubbing<T> {
+public class OngoingStaticStubbing<T> {
+    private final Class<?> clazz;
     private final Method method;
     private final Object[] args;
 
-    public OngoingStubbing(Method method, Object[] args) {
+    public OngoingStaticStubbing(Class<?> clazz, Method method, Object[] args) {
+        this.clazz = clazz;
         this.method = method;
         this.args = args;
     }
 
     public void thenReturn(T value) {
-        BehaviorRegistry.registerInstanceRule(method, args, new ReturnBehavior<>(value));
+        BehaviorRegistry.registerStaticRule(clazz, method, args, new ReturnBehavior<>(value));
     }
 
     public void thenThrow(Throwable exception) {
-        BehaviorRegistry.registerInstanceRule(method, args, new ThrowBehavior(exception));
+        BehaviorRegistry.registerStaticRule(clazz, method, args, new ThrowBehavior(exception));
     }
 }

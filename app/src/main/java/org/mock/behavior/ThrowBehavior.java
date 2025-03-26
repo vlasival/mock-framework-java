@@ -1,4 +1,5 @@
 package org.mock.behavior;
+
 public class ThrowBehavior implements BehaviorRule {
     private final Throwable exception;
 
