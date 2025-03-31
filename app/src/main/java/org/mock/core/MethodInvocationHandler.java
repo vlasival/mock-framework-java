@@ -18,8 +18,7 @@ public class MethodInvocationHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         // Сохраняем информацию о вызове обычного метода
-        MethodCall call = new MethodCall(method, args);
-        lastInstanceCall.set(call);
+        lastInstanceCall.set(new MethodCall(method, args));
 
         // Ищем правило в реестре
         BehaviorRule rule = BehaviorRegistry.findInstanceRule(method, args);

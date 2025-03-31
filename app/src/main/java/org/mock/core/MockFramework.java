@@ -1,6 +1,8 @@
 package org.mock.core;
 
 import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
+import net.bytebuddy.dynamic.loading.ClassReloadingStrategy;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 
@@ -29,14 +31,16 @@ public class MockFramework {
 
     // Новый метод для статических методов
     public static <T> void mockStatic(Class<T> type) {
-        if (staticMocks.containsKey(type))
+        if (staticMocks.containsKey(type)) {
+            System.out.println("Класс уже замокан");
             return;
+        }
 
         try {
             Class<?> subclass = new ByteBuddy()
-                    .redefine(type)
-                    .method(ElementMatchers.isStatic())
-                    .intercept(MethodDelegation.to(new StaticMethodInterceptor()))
+                    .redefine(type) // Модифицируем существующий класс
+                    .method(ElementMatchers.isStatic()) // Перехватываем статические методы
+                    .intercept(MethodDelegation.to(new StaticMethodInterceptor())) // Перенаправляем вызовы
                     .make()
                     .load(type.getClassLoader())
                     .getLoaded();
@@ -75,13 +79,14 @@ public class MockFramework {
         try {
             return new ByteBuddy()
                     .subclass(classType)
-                    .method(ElementMatchers.any())
+                    .method(ElementMatchers.not(ElementMatchers.isDeclaredBy(Object.class)))
                     .intercept(MethodDelegation.to(new MethodInvocationHandler()))
                     .make()
-                    .load(classType.getClassLoader())
+                    .load(classType.getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)
                     .getLoaded()
+                    .getDeclaredConstructor()
                     .newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
