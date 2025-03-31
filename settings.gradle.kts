@@ -10,5 +10,9 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
 
-rootProject.name = "mock-framework-java"
-include("app")
+rootProject.name = "mock-framework"
+
+include("mock-core")
+include("mock-junit-extension")
+include("application")
+
