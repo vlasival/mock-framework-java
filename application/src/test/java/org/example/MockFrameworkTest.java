@@ -1,4 +1,4 @@
-package org.mock;
+package org.example;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,10 +45,8 @@ public class MockFrameworkTest {
     @Test
     public void testInterfaceMock() {
         // Настройка поведения для метода интерфейса
-        MockFramework.startStubbing(null);
         myService.greet("Alice");
         OngoingStubbing<String> stub = MockFramework.when(null);
-        MockFramework.stopStubbing();
         stub.thenReturn("Hello, Alice!");
 
         // Проверка корректного возвращаемого значения
@@ -58,10 +56,8 @@ public class MockFrameworkTest {
     @Test
     public void testClassMock() {
         // Настройка поведения для метода класса
-        MockFramework.startStubbing(null);
         calculator.add(3, 4);
         OngoingStubbing<Integer> stub = MockFramework.when(null);
-        MockFramework.stopStubbing();
         stub.thenReturn(100);
 
         // Проверка корректного возвращаемого значения
@@ -71,10 +67,8 @@ public class MockFrameworkTest {
     @Test
     public void testThenThrow() {
         // Настройка поведения для выброса исключения
-        MockFramework.startStubbing(null);
         calculator.add(10, 20);
         OngoingStubbing<Integer> stub = MockFramework.when(null);
-        MockFramework.stopStubbing();
         stub.thenThrow(new RuntimeException("Ошибка!"));
 
         // Проверка выброса исключения с нужным сообщением

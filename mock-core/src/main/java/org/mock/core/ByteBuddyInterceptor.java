@@ -2,6 +2,8 @@ package org.mock.core;
 
 import java.lang.reflect.Method;
 
+import org.mock.tools.DefaultValueProvider;
+
 import net.bytebuddy.implementation.bind.annotation.AllArguments;
 import net.bytebuddy.implementation.bind.annotation.Origin;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
@@ -34,7 +36,7 @@ public class ByteBuddyInterceptor {
         // Если режим stubbing активен, делегируем хэндлеру фиксацию вызова
         if (MockFramework.stubbingMode.get()) {
             MockFramework.currentInvocation.set(new MockFramework.InvocationData(handler, method, args));
-            return org.mock.tools.DefaultValueProvider.getDefaultValue(method.getReturnType());
+            return DefaultValueProvider.getDefaultValue(method.getReturnType());
         }
         return handler.invoke(proxy, method, args);
     }
