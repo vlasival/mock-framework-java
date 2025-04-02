@@ -44,34 +44,34 @@ public class MockFrameworkTest {
 
     @Test
     public void testInterfaceMock() {
-        // Настройка поведения для метода интерфейса
+        MockFramework.startStubbing();
         myService.greet("Alice");
         OngoingStubbing<String> stub = MockFramework.when(null);
         stub.thenReturn("Hello, Alice!");
+        MockFramework.stopStubbing();
 
-        // Проверка корректного возвращаемого значения
         assertEquals("Hello, Alice!", myService.greet("Alice"));
     }
 
     @Test
     public void testClassMock() {
-        // Настройка поведения для метода класса
+        MockFramework.startStubbing();
         calculator.add(3, 4);
         OngoingStubbing<Integer> stub = MockFramework.when(null);
         stub.thenReturn(100);
+        MockFramework.stopStubbing();
 
-        // Проверка корректного возвращаемого значения
         assertEquals(100, calculator.add(3, 4));
     }
 
     @Test
     public void testThenThrow() {
-        // Настройка поведения для выброса исключения
+        MockFramework.startStubbing();
         calculator.add(10, 20);
         OngoingStubbing<Integer> stub = MockFramework.when(null);
         stub.thenThrow(new RuntimeException("Ошибка!"));
-
-        // Проверка выброса исключения с нужным сообщением
+        MockFramework.stopStubbing();
+        
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             calculator.add(10, 20);
         });

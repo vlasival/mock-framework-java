@@ -21,7 +21,7 @@ public class BehaviorRegistry {
         staticRules.put(getKey(method, args), rule);
     }
 
-    public static BehaviorRule findStaticRule(Class<?> clazz, Method method, Object[] args) {
+    public static BehaviorRule findStaticRule(Method method, Object[] args) {
         return staticRules.get(getKey(method, args));
     }
 
@@ -35,7 +35,7 @@ public class BehaviorRegistry {
         }
         return sb.toString();
     }
-    
+
     // Для очистки правил между тестами
     public static void clear() {
         instanceRules.clear();

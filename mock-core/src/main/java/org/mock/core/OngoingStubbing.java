@@ -7,12 +7,10 @@ import org.mock.behavior.BehaviorRule;
 
 public class OngoingStubbing<T> {
 
-    private final MethodInvocationHandler handler;
     private final Method method;
     private final Object[] args;
 
-    public OngoingStubbing(MethodInvocationHandler handler, Method method, Object[] args) {
-        this.handler = handler;
+    public OngoingStubbing(Method method, Object[] args) {
         this.method = method;
         this.args = args;
     }

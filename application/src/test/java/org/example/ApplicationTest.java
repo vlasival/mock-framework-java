@@ -3,7 +3,6 @@ package org.example;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mock.core.MockFramework;
-import org.mock.core.OngoingStubbing;
 import org.mock.junit.MockingExtension;
 import org.mock.annotation.Mock;
 
@@ -18,7 +17,10 @@ class ApplicationTest {
 
     @Test
     void testMocking() {
+        MockFramework.startStubbing();
         when(service.someMethod()).thenReturn("Mocked Response");
+        MockFramework.stopStubbing();
+        
         assertEquals("Mocked Response", service.someMethod());
     }
 
@@ -31,12 +33,11 @@ class ApplicationTest {
 
     @Test
     public void testClassMock() {
-        // Настройка поведения для метода класса
-        calculator.add(3, 4);
-        OngoingStubbing<Integer> stub = MockFramework.when(null);
-        stub.thenReturn(100);
+        MockFramework.startStubbing();
+        when(calculator.add(3, 4)).thenReturn(100);
+        MockFramework.stopStubbing();
 
-        // Проверка корректного возвращаемого значения
+
         assertEquals(100, calculator.add(3, 4));
     }
 

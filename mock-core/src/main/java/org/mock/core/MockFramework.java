@@ -7,8 +7,10 @@ import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.function.Supplier;
 
 import org.mock.tools.DefaultValueProvider;
 
@@ -23,7 +25,6 @@ public class MockFramework {
     // stubbing
     static final ThreadLocal<InvocationData> currentInvocation = new ThreadLocal<>();
     static final ThreadLocal<Boolean> stubbingMode = ThreadLocal.withInitial(() -> false);
-    private static final ThreadLocal<MethodInvocationHandler> handlerRef = new ThreadLocal<>();
 
     /**
      * Создает mock-объект для заданного класса или интерфейса.
@@ -33,7 +34,6 @@ public class MockFramework {
     public static <T> T mock(Class<T> clazz) throws Exception {
         if (clazz.isInterface()) {
             MethodInvocationHandler handler = new MethodInvocationHandler();
-            handlerRef.set(handler);
             return (T) Proxy.newProxyInstance(
                     clazz.getClassLoader(),
                     new Class[] { clazz },
@@ -43,12 +43,10 @@ public class MockFramework {
             Object[] args = generateDefaultArgs(constructor.getParameterTypes());
 
             MethodInvocationHandler handler = new MethodInvocationHandler();
-            ByteBuddyInterceptor interceptor = new ByteBuddyInterceptor(handler);
-            handlerRef.set(handler);
             return (T) new ByteBuddy()
                     .subclass(clazz)
                     .method(ElementMatchers.any())
-                    .intercept(MethodDelegation.to(interceptor))
+                    .intercept(InvocationHandlerAdapter.of(handler))
                     .make()
                     .load(clazz.getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)
                     .getLoaded()
@@ -116,7 +114,7 @@ public class MockFramework {
      * Пример использования:
      * when(mock.someMethod()).thenReturn(42);
      */
-    public static <T> OngoingStubbing<T> when(T methodCallResult) {
+    public static <T> OngoingStubbing<T> when(T methodCall) {
         stubbingMode.set(true);
         try {
             InvocationData data = currentInvocation.get();
@@ -124,7 +122,7 @@ public class MockFramework {
                 throw new IllegalStateException("Не зафиксирован вызов метода для stubbing.");
             }
             currentInvocation.remove();
-            return new OngoingStubbing<>(data.handler, data.method, data.args);
+            return new OngoingStubbing<>(data.method, data.args);
         } finally {
             stubbingMode.set(false);
         }
@@ -133,12 +131,11 @@ public class MockFramework {
     /**
      * Режим для захвата вызова метода.
      */
-    private static <T> T startStubbing(T dummy) {
+    public static void startStubbing() {
         stubbingMode.set(true);
-        return capture(dummy);
     }
 
-    private static void stopStubbing() {
+    public static void stopStubbing() {
         stubbingMode.set(false);
     }
 
@@ -153,12 +150,10 @@ public class MockFramework {
      * Данные о захваченном вызове.
      */
     static class InvocationData {
-        final MethodInvocationHandler handler;
         final Method method;
         final Object[] args;
 
-        InvocationData(MethodInvocationHandler handler, Method method, Object[] args) {
-            this.handler = handler;
+        InvocationData(Method method, Object[] args) {
             this.method = method;
             this.args = args;
         }
