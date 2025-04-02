@@ -1,28 +1,30 @@
 package org.mock.core;
 
 import net.bytebuddy.agent.ByteBuddyAgent;
-import net.bytebuddy.asm.Advice;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.loading.ClassReloadingStrategy;
+import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 
 public class StaticMocking {
     static {
-        // Устанавливаем агент ByteBuddy (это нужно сделать один раз)
+        // Убедитесь, что ByteBuddyAgent загружен
         ByteBuddyAgent.install();
     }
 
     /**
-     * Перезаписывает класс так, чтобы все статические методы перехватывались.
-     * После вызова этого метода, вызовы статических методов будут перенаправляться
-     * в наш Advice.
+     * Метод для создания mock-объекта для статического метода.
+     * Использует ByteBuddy для создания прокси-объекта.
      */
-    public static void mockStatic(Class<?> clazz) {
-        new ByteBuddy()
+    public static <T> T mockStatic(Class<T> clazz) throws Exception {
+        return new ByteBuddy()
                 .redefine(clazz)
-                .visit(Advice.to(StaticMethodAdvice.class)
-                        .on(ElementMatchers.isStatic()))
+                .method(ElementMatchers.any())
+                .intercept(MethodDelegation.to(StaticMethodAdvice.class))
                 .make()
-                .load(clazz.getClassLoader(), ClassReloadingStrategy.fromInstalledAgent());
+                .load(clazz.getClassLoader(), ClassReloadingStrategy.fromInstalledAgent())
+                .getLoaded()
+                .getDeclaredConstructor()
+                .newInstance();
     }
 }

@@ -10,6 +10,7 @@ import java.util.concurrent.Callable;
 
 import org.mock.behavior.BehaviorRegistry;
 import org.mock.tools.DefaultValueProvider;
+import org.mock.tools.MethodCall;
 
 public class StaticInterceptor {
 
@@ -19,11 +20,11 @@ public class StaticInterceptor {
                                    @SuperCall Callable<?> zuper) throws Exception {
         // Если включен режим stubbing, фиксируем вызов
         if (MockFramework.stubbingMode.get()) {
-            MockFramework.currentInvocation.set(new MockFramework.InvocationData(method, args));
+            MockFramework.currentInvocation.set(new MethodCall(method, args));
             return DefaultValueProvider.getDefaultValue(method.getReturnType());
         }
         // Проверяем, задано ли stub-правило для данного вызова
-        Object stub = BehaviorRegistry.findStaticRule(method, args);
+        Object stub = BehaviorRegistry.findInstanceRule(method, args);
         if (stub != null) {
             return stub;
         }

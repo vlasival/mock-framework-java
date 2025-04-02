@@ -17,10 +17,10 @@ class ApplicationTest {
 
     @Test
     void testMocking() {
-        MockFramework.startStubbing();
+        MockFramework.startMocking();
         when(service.someMethod()).thenReturn("Mocked Response");
-        MockFramework.stopStubbing();
-        
+        MockFramework.stopMocking();
+
         assertEquals("Mocked Response", service.someMethod());
     }
 
@@ -33,10 +33,9 @@ class ApplicationTest {
 
     @Test
     public void testClassMock() {
-        MockFramework.startStubbing();
+        MockFramework.startMocking();
         when(calculator.add(3, 4)).thenReturn(100);
-        MockFramework.stopStubbing();
-
+        MockFramework.stopMocking();
 
         assertEquals(100, calculator.add(3, 4));
     }

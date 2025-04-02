@@ -44,34 +44,34 @@ public class MockFrameworkTest {
 
     @Test
     public void testInterfaceMock() {
-        MockFramework.startStubbing();
+        MockFramework.startMocking();
         myService.greet("Alice");
         OngoingStubbing<String> stub = MockFramework.when(null);
         stub.thenReturn("Hello, Alice!");
-        MockFramework.stopStubbing();
+        MockFramework.stopMocking();
 
         assertEquals("Hello, Alice!", myService.greet("Alice"));
     }
 
     @Test
     public void testClassMock() {
-        MockFramework.startStubbing();
+        MockFramework.startMocking();
         calculator.add(3, 4);
         OngoingStubbing<Integer> stub = MockFramework.when(null);
         stub.thenReturn(100);
-        MockFramework.stopStubbing();
+        MockFramework.stopMocking();
 
         assertEquals(100, calculator.add(3, 4));
     }
 
     @Test
     public void testThenThrow() {
-        MockFramework.startStubbing();
+        MockFramework.startMocking();
         calculator.add(10, 20);
         OngoingStubbing<Integer> stub = MockFramework.when(null);
         stub.thenThrow(new RuntimeException("Ошибка!"));
-        MockFramework.stopStubbing();
-        
+        MockFramework.stopMocking();
+
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             calculator.add(10, 20);
         });

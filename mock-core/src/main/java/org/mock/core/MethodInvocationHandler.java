@@ -13,11 +13,9 @@ public class MethodInvocationHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         // Если мы находимся в режиме stubbing, сохраняем информацию о вызове
         if (MockFramework.stubbingMode.get()) {
-            MockFramework.currentInvocation.set(new MockFramework.InvocationData(method, args));
+            MockFramework.recordCall(method, args);
             return DefaultValueProvider.getDefaultValue(method.getReturnType());
         }
-
-        System.out.println(MockFramework.stubbingMode.get());
 
         // Обработка методов из Object
         if (method.getDeclaringClass().equals(Object.class)) {

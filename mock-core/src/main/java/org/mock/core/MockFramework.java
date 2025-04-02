@@ -3,16 +3,14 @@ package org.mock.core;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.InvocationHandlerAdapter;
-import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.function.Supplier;
-
+import org.mock.matchers.MatcherContext;
 import org.mock.tools.DefaultValueProvider;
+import org.mock.tools.MethodCall;
 
 /**
  * Отвечает за cоздание mock-объектов.
@@ -23,7 +21,7 @@ import org.mock.tools.DefaultValueProvider;
 public class MockFramework {
     // ThreadLocal для хранения информации о последнем вызове метода в режиме
     // stubbing
-    static final ThreadLocal<InvocationData> currentInvocation = new ThreadLocal<>();
+    static final ThreadLocal<MethodCall> currentInvocation = new ThreadLocal<>();
     static final ThreadLocal<Boolean> stubbingMode = ThreadLocal.withInitial(() -> false);
 
     /**
@@ -85,77 +83,37 @@ public class MockFramework {
     }
 
     /**
-     * Возвращает дефолтное значение для типа параметра.
-     */
-    private static Object getDefaultValue(Class<?> type) {
-        if (type.isPrimitive()) {
-            if (type == boolean.class)
-                return false;
-            if (type == byte.class)
-                return (byte) 0;
-            if (type == short.class)
-                return (short) 0;
-            if (type == int.class)
-                return 0;
-            if (type == long.class)
-                return 0L;
-            if (type == float.class)
-                return 0.0f;
-            if (type == double.class)
-                return 0.0;
-            if (type == char.class)
-                return '\u0000';
-        }
-        return null;
-    }
-
-    /**
      * Захватывает вызов метода для последующего задания поведения.
      * Пример использования:
      * when(mock.someMethod()).thenReturn(42);
      */
     public static <T> OngoingStubbing<T> when(T methodCall) {
-        stubbingMode.set(true);
-        try {
-            InvocationData data = currentInvocation.get();
-            if (data == null) {
-                throw new IllegalStateException("Не зафиксирован вызов метода для stubbing.");
-            }
-            currentInvocation.remove();
-            return new OngoingStubbing<>(data.method, data.args);
-        } finally {
-            stubbingMode.set(false);
+        MethodCall data = currentInvocation.get();
+        if (data == null) {
+            throw new IllegalStateException("Не зафиксирован вызов метода для stubbing.");
         }
+        currentInvocation.remove();
+        return new OngoingStubbing<>(data.getMethod(), data.getArgs());
     }
 
     /**
      * Режим для захвата вызова метода.
      */
-    public static void startStubbing() {
+    public static void startMocking() {
         stubbingMode.set(true);
     }
 
-    public static void stopStubbing() {
+    public static void stopMocking() {
         stubbingMode.set(false);
     }
 
-    /**
-     * Вспомогательный метод для захвата вызова.
-     */
-    static <T> T capture(T dummy) {
-        return dummy;
-    }
-
-    /**
-     * Данные о захваченном вызове.
-     */
-    static class InvocationData {
-        final Method method;
-        final Object[] args;
-
-        InvocationData(Method method, Object[] args) {
-            this.method = method;
-            this.args = args;
+    public static void recordCall(Method method, Object[] args) {
+        // Для каждого аргумента проверяем, есть ли matcher в MatcherContext.
+        Object[] processedArgs = new Object[args == null ? 0 : args.length];
+        for (int i = 0; i < processedArgs.length; i++) {
+            Object matcher = MatcherContext.pollMatcher();
+            processedArgs[i] = (matcher != null) ? matcher : args[i];
         }
+        currentInvocation.set(new MethodCall(method, processedArgs));
     }
 }
