@@ -19,8 +19,7 @@ import org.mock.tools.MethodCall;
  * Для классов использует ByteBuddy для создания подклассов.
  */
 public class MockFramework {
-    // ThreadLocal для хранения информации о последнем вызове метода в режиме
-    // stubbing
+
     static final ThreadLocal<MethodCall> currentInvocation = new ThreadLocal<>();
     static final ThreadLocal<Boolean> stubbingMode = ThreadLocal.withInitial(() -> false);
 
@@ -84,8 +83,6 @@ public class MockFramework {
 
     /**
      * Захватывает вызов метода для последующего задания поведения.
-     * Пример использования:
-     * when(mock.someMethod()).thenReturn(42);
      */
     public static <T> OngoingStubbing<T> when(T methodCall) {
         MethodCall data = currentInvocation.get();

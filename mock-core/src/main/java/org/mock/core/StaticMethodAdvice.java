@@ -16,21 +16,19 @@ public class StaticMethodAdvice {
         if (MockFramework.stubbingMode.get()) {
             MockFramework.currentInvocation.set(new MethodCall(method, args));
         }
-        // Проверяем, задан ли stub для данного вызова
+
         Object stub = BehaviorRegistry.findInstanceRule(method, args);
         if (stub != null) {
             return stub;
         }
-        // Если stub не найден, возвращаем специальное значение, чтобы продолжить
-        // выполнение оригинального метода
+
         return null;
     }
 
     @Advice.OnMethodExit
     public static void onExit(@Advice.Enter Object stubValue,
             @Advice.Return(readOnly = false) Object returned) {
-        // Если stubValue было возвращено (не UNSPECIFIED), то устанавливаем его как
-        // результат
+                
         if (stubValue != null) {
             returned = stubValue;
         }

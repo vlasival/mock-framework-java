@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BehaviorRegistry {
-    // Карты для хранения правил для instance и static вызовов
     private static final Map<String, BehaviorRule> instanceRules = new HashMap<>();
 
     public static void registerInstanceRule(Method method, Object[] args, BehaviorRule rule) {
@@ -27,7 +26,6 @@ public class BehaviorRegistry {
         return sb.toString();
     }
 
-    // Для очистки правил между тестами
     public static void clear() {
         instanceRules.clear();
     }
